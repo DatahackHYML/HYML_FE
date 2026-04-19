@@ -1505,6 +1505,11 @@ export default function Dashboard() {
                 const missionId = ev.id || i;
                 const isExpanded = expandedMissionId === missionId;
                 const details = getMissionDetails(ev);
+                const date = new Date(ev.event_date);
+                const now = new Date();
+
+                const diffMs = date - now; // ms 단위 차이
+                const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
                 return (
                   <div
@@ -1528,8 +1533,10 @@ export default function Dashboard() {
                       </div>
                       <div style={styles.eventRight}>
                         <div style={styles.eventDateWrap}>
-                          <span style={styles.eventDate}>{ev.date}</span>
-                          <span style={styles.eventDays}>D-{ev.daysLeft}</span>
+                          <span style={styles.eventDate}>
+                            {date.toLocaleString("en-US")}
+                          </span>
+                          <span style={styles.eventDays}>D-{daysLeft}</span>
                         </div>
                         <div style={styles.eventPts}>+{ev.points} pts</div>
                       </div>

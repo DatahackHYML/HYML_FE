@@ -1,51 +1,92 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabase';
 
 const GROUPS = [
-  {
-    name: "Hunters",
-    emoji: "🦈",
-    desc: "Bold, driven, decisive. You cut through the current.",
-  },
-  {
-    name: "Wanderers",
-    emoji: "🐬",
-    desc: "Free-spirited, curious, always exploring new depths.",
-  },
-  {
-    name: "Builders",
-    emoji: "🐙",
-    desc: "Creative, strategic, weaving intricate solutions.",
-  },
-  {
-    name: "Guardians",
-    emoji: "🐢",
-    desc: "Wise, steady, protecting what matters most.",
-  },
+  { name: 'Hunters',   emoji: '🦈', desc: 'Bold, driven, decisive. You cut through the current.' },
+  { name: 'Wanderers', emoji: '🐬', desc: 'Free-spirited, curious, always exploring new depths.' },
+  { name: 'Builders',  emoji: '🐙', desc: 'Creative, strategic, weaving intricate solutions.' },
+  { name: 'Guardians', emoji: '🐢', desc: 'Wise, steady, protecting what matters most.' },
 ];
 
 const BUBBLE_DATA = Array.from({ length: 12 }, (_, i) => ({
   id: i,
-  left: `${8 + ((i * 7.5) % 84)}%`,
-  size: `${7 + ((i * 3) % 14)}px`,
+  left: `${8 + (i * 7.5) % 84}%`,
+  size: `${7 + (i * 3) % 14}px`,
   delay: `${(i * 0.7) % 7}s`,
-  duration: `${6 + ((i * 1.1) % 7)}s`,
-  bottom: `${5 + ((i * 6) % 25)}%`,
+  duration: `${6 + (i * 1.1) % 7}s`,
+  bottom: `${5 + (i * 6) % 25}%`,
 }));
 
 export default function Main() {
-  const navigate = useNavigate();
-  const [visible, setVisible] = useState(false);
-  const contactRef = useRef(null);
+  const navigate   = useNavigate();
+  const [visible,  setVisible]  = useState(false);
+  const [user,     setUser]     = useState(null);
+  const [modal,    setModal]    = useState(false);
+  const [tab,      setTab]      = useState('signin');
+  const [email,    setEmail]    = useState('');
+  const [password, setPassword] = useState('');
+  const [authErr,  setAuthErr]  = useState('');
+  const [authBusy, setAuthBusy] = useState(false);
 
+  const obtiRef    = useRef(null);
+  const footerRef  = useRef(null);
+
+  // Fade-in on mount
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
 
-  const scrollToContact = () => {
-    contactRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  // Restore existing session
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  function scrollTo(ref) {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function openModal(initialTab = 'signin') {
+    setTab(initialTab);
+    setEmail('');
+    setPassword('');
+    setAuthErr('');
+    setModal(true);
+  }
+
+  async function handleAuth(e) {
+    e.preventDefault();
+    setAuthBusy(true);
+    setAuthErr('');
+    try {
+      let error;
+      if (tab === 'signin') {
+        ({ error } = await supabase.auth.signInWithPassword({ email, password }));
+      } else {
+        ({ error } = await supabase.auth.signUp({ email, password }));
+      }
+      if (error) {
+        setAuthErr(error.message);
+      } else {
+        setModal(false);
+      }
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+  }
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'You';
 
   return (
     <div style={styles.page}>
@@ -53,61 +94,66 @@ export default function Main() {
       <div style={styles.bgGlow2} />
 
       <div style={styles.bubblesWrap}>
-        {BUBBLE_DATA.map((b) => (
+        {BUBBLE_DATA.map(b => (
           <div
             key={b.id}
             style={{
-              position: "absolute",
+              position: 'absolute',
               left: b.left,
               bottom: b.bottom,
               width: b.size,
               height: b.size,
-              borderRadius: "50%",
-              border: "1px solid rgba(100,200,255,0.28)",
-              background:
-                "radial-gradient(circle at 30% 30%, rgba(150,220,255,0.12), transparent)",
+              borderRadius: '50%',
+              border: '1px solid rgba(100,200,255,0.28)',
+              background: 'radial-gradient(circle at 30% 30%, rgba(150,220,255,0.12), transparent)',
               animation: `bubble ${b.duration} ${b.delay} linear infinite`,
             }}
           />
         ))}
       </div>
 
-      {/* Nav */}
+      {/* ── Nav ── */}
       <nav style={styles.nav}>
-        <span style={styles.logo} onClick={() => navigate("/")}>
-          HYML
-        </span>
+        <span style={styles.logo}>HYML</span>
         <div style={styles.navLinks}>
-          <span style={styles.navLink} onClick={scrollToContact}>
-            Contact
-          </span>
+          <span style={styles.navLink} onClick={() => scrollTo(obtiRef)}>OBTI</span>
+
+          {user ? (
+            <>
+              <span style={{ ...styles.navLink, color: '#90e0ef', cursor: 'default' }}>
+                {displayName}
+              </span>
+              <span style={styles.navLink} onClick={handleSignOut}>Sign Out</span>
+            </>
+          ) : (
+            <span style={styles.navLink} onClick={() => openModal('signin')}>Sign In</span>
+          )}
+
+          <span style={styles.navLink} onClick={() => scrollTo(footerRef)}>Contact</span>
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* ── Hero ── */}
       <section
         style={{
           ...styles.hero,
           opacity: visible ? 1 : 0,
-          transform: visible ? "translateY(0)" : "translateY(20px)",
-          transition: "opacity 1s ease, transform 1s ease",
+          transform: visible ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'opacity 1s ease, transform 1s ease',
         }}
       >
         <div style={styles.heroContent}>
           <p style={styles.eyebrow}>Ocean-Based Type Indicator</p>
           <h1 style={styles.heroTitle}>
-            What kind of
-            <br />
-            <span style={styles.accent}>ocean creature</span>
-            <br />
+            What kind of<br />
+            <span style={styles.accent}>ocean creature</span><br />
             are you?
           </h1>
           <p style={styles.heroSub}>
-            Dive deep. Discover your ocean personality.
-            <br />
+            Dive deep. Discover your ocean personality.<br />
             Join your group and protect what matters.
           </p>
-          <button style={styles.ctaBtn} onClick={() => navigate("/quiz")}>
+          <button style={styles.ctaBtn} onClick={() => navigate('/quiz')}>
             Take the Quiz &nbsp;→
           </button>
           <p style={styles.ctaNote}>16 questions · 2 minutes · Free</p>
@@ -120,18 +166,16 @@ export default function Main() {
         </div>
       </section>
 
-      {/* Depth separator */}
+      {/* ── Depth separator ── */}
       <div style={styles.depthRow}>
         <span style={styles.depthTag}>200m</span>
         <div style={styles.depthLine} />
       </div>
 
-      {/* Groups */}
-      <section style={styles.groupsSection}>
+      {/* ── OBTI / Groups section ── */}
+      <section ref={obtiRef} style={styles.groupsSection}>
         <h2 style={styles.sectionTitle}>Discover Your Ocean Type — OBTI</h2>
-        <p style={styles.sectionSub}>
-          Four groups. One ocean. Which current do you ride?
-        </p>
+        <p style={styles.sectionSub}>Four groups. One ocean. Which current do you ride?</p>
         <div style={styles.groupGrid}>
           {GROUPS.map((g, i) => (
             <div
@@ -147,28 +191,31 @@ export default function Main() {
             </div>
           ))}
         </div>
+        <button style={styles.outlineBtn} onClick={() => navigate('/quiz')}>
+          Test your own OBTI &nbsp;→
+        </button>
       </section>
 
-      {/* About */}
+      {/* ── About ── */}
       <section style={styles.aboutSection}>
         <p style={styles.aboutLabel}>About</p>
 
         {[
           {
-            icon: "🔍",
-            title: "Discover your own OBTI",
+            icon: '🔍',
+            title: 'Discover your own OBTI',
             body: "The Ocean-Based Type Indicator maps your personality to one of 16 ocean animals through a scientifically-inspired questionnaire. Understand how you think, connect, and act.",
             flip: false,
           },
           {
-            icon: "🌍",
-            title: "Join the group and earn echo points",
+            icon: '🌍',
+            title: 'Join the group and earn echo points',
             body: "Connect with people who share your ocean type. Complete real-world environmental missions, earn echo points, and climb the leaderboard while protecting our oceans.",
             flip: true,
           },
           {
-            icon: "📊",
-            title: "Real data from Scripps Institution of Oceanography",
+            icon: '📊',
+            title: 'Real data from Scripps Institution of Oceanography',
             body: "HYML partners with CalCOFI — one of the world's longest-running ocean monitoring programs — to show you what's at stake for marine life, right now.",
             flip: false,
           },
@@ -177,7 +224,7 @@ export default function Main() {
             key={item.title}
             style={{
               ...styles.aboutRow,
-              flexDirection: item.flip ? "row-reverse" : "row",
+              flexDirection: item.flip ? 'row-reverse' : 'row',
             }}
           >
             <div style={styles.aboutIcon}>{item.icon}</div>
@@ -189,305 +236,308 @@ export default function Main() {
         ))}
       </section>
 
-      {/* Footer */}
-      <footer ref={contactRef} style={styles.footer}>
+      {/* ── Footer ── */}
+      <footer ref={footerRef} style={styles.footer}>
         <p style={styles.footerMain}>
-          HYML · How You Marine Life · Built for the Scripps Institution of
-          Oceanography Challenge
+          HYML · How You Marine Life · Built for the Scripps Institution of Oceanography Challenge
         </p>
-        <p style={styles.footerSub}>
-          Data powered by CalCOFI · California Current Ecosystem
+        <p style={styles.footerSub}>Data powered by CalCOFI · California Current Ecosystem</p>
+        <p style={styles.footerContact}>
+          Questions?&nbsp;
+          <a
+            href="mailto:hello@hyml.ocean"
+            style={{ color: '#48cae4', textDecoration: 'none' }}
+          >
+            hello@hyml.ocean
+          </a>
         </p>
       </footer>
+
+      {/* ── Auth Modal ── */}
+      {modal && (
+        <div style={styles.modalOverlay} onClick={() => setModal(false)}>
+          <div style={styles.modalCard} onClick={e => e.stopPropagation()}>
+            {/* Tabs */}
+            <div style={styles.modalTabs}>
+              {['signin', 'signup'].map(t => (
+                <button
+                  key={t}
+                  style={{
+                    ...styles.modalTab,
+                    ...(tab === t ? styles.modalTabActive : {}),
+                  }}
+                  onClick={() => { setTab(t); setAuthErr(''); }}
+                >
+                  {t === 'signin' ? 'Sign In' : 'Sign Up'}
+                </button>
+              ))}
+            </div>
+
+            <h3 style={styles.modalTitle}>
+              {tab === 'signin' ? 'Welcome back' : 'Join the ocean'}
+            </h3>
+            <p style={styles.modalSub}>
+              {tab === 'signin'
+                ? 'Sign in to track your missions and echo points.'
+                : 'Create an account to join your OBTI group.'}
+            </p>
+
+            <form onSubmit={handleAuth} style={styles.modalForm}>
+              <label style={styles.inputLabel}>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                style={styles.input}
+              />
+
+              <label style={styles.inputLabel}>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                style={styles.input}
+              />
+
+              {authErr && <p style={styles.authError}>{authErr}</p>}
+
+              <button
+                type="submit"
+                disabled={authBusy}
+                style={{ ...styles.authBtn, opacity: authBusy ? 0.6 : 1 }}
+              >
+                {authBusy
+                  ? 'Please wait…'
+                  : tab === 'signin' ? 'Sign In' : 'Create Account'}
+              </button>
+            </form>
+
+            <p style={styles.modalSwitch}>
+              {tab === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+              <span
+                style={{ color: '#48cae4', cursor: 'pointer', fontWeight: 600 }}
+                onClick={() => { setTab(tab === 'signin' ? 'signup' : 'signin'); setAuthErr(''); }}
+              >
+                {tab === 'signin' ? 'Sign up' : 'Sign in'}
+              </span>
+            </p>
+
+            <button style={styles.modalClose} onClick={() => setModal(false)}>✕</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background:
-      "linear-gradient(180deg, #020b18 0%, #041428 18%, #061e3a 40%, #082450 58%, #061e3a 78%, #041428 100%)",
-    position: "relative",
-    overflow: "hidden",
-    color: "#e8f4fd",
+    minHeight: '100vh',
+    background: 'linear-gradient(180deg, #020b18 0%, #041428 18%, #061e3a 40%, #082450 58%, #061e3a 78%, #041428 100%)',
+    position: 'relative',
+    overflow: 'hidden',
+    color: '#e8f4fd',
   },
   bgGlow1: {
-    position: "fixed",
-    inset: 0,
-    background:
-      "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,90,160,0.22) 0%, transparent 60%)",
-    pointerEvents: "none",
-    zIndex: 0,
+    position: 'fixed', inset: 0,
+    background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,90,160,0.22) 0%, transparent 60%)',
+    pointerEvents: 'none', zIndex: 0,
   },
   bgGlow2: {
-    position: "fixed",
-    inset: 0,
-    background:
-      "radial-gradient(ellipse 60% 40% at 80% 70%, rgba(0,60,120,0.12) 0%, transparent 60%)",
-    pointerEvents: "none",
-    zIndex: 0,
+    position: 'fixed', inset: 0,
+    background: 'radial-gradient(ellipse 60% 40% at 80% 70%, rgba(0,60,120,0.12) 0%, transparent 60%)',
+    pointerEvents: 'none', zIndex: 0,
   },
-  bubblesWrap: {
-    position: "fixed",
-    inset: 0,
-    pointerEvents: "none",
-    zIndex: 1,
-  },
+  bubblesWrap: { position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1 },
   nav: {
-    position: "relative",
-    zIndex: 10,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "22px 48px",
-    borderBottom: "1px solid rgba(100,180,255,0.07)",
+    position: 'relative', zIndex: 10,
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    padding: '22px 48px',
+    borderBottom: '1px solid rgba(100,180,255,0.07)',
   },
-  logo: {
-    fontSize: "20px",
-    fontWeight: 800,
-    letterSpacing: "5px",
-    color: "#90e0ef",
-    cursor: "pointer",
-  },
-  navLinks: { display: "flex", gap: "36px" },
+  logo: { fontSize: '20px', fontWeight: 800, letterSpacing: '5px', color: '#90e0ef' },
+  navLinks: { display: 'flex', gap: '36px', alignItems: 'center' },
   navLink: {
-    color: "rgba(200,230,255,0.65)",
-    fontSize: "13px",
-    fontWeight: 500,
-    letterSpacing: "1px",
-    cursor: "pointer",
+    color: 'rgba(200,230,255,0.65)', fontSize: '13px', fontWeight: 500,
+    letterSpacing: '1px', cursor: 'pointer',
+    transition: 'color 0.2s',
   },
   hero: {
-    position: "relative",
-    zIndex: 5,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "80px 48px 90px",
-    minHeight: "82vh",
-    gap: "40px",
+    position: 'relative', zIndex: 5,
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    padding: '80px 48px 90px', minHeight: '82vh', gap: '40px',
   },
-  heroContent: { flex: 1, maxWidth: "560px" },
+  heroContent: { flex: 1, maxWidth: '560px' },
   eyebrow: {
-    fontSize: "11px",
-    fontWeight: 600,
-    letterSpacing: "3.5px",
-    textTransform: "uppercase",
-    color: "#48cae4",
-    marginBottom: "20px",
+    fontSize: '11px', fontWeight: 600, letterSpacing: '3.5px', textTransform: 'uppercase',
+    color: '#48cae4', marginBottom: '20px',
   },
   heroTitle: {
-    fontSize: "clamp(40px, 5.5vw, 68px)",
-    fontWeight: 800,
-    lineHeight: 1.1,
-    color: "#e8f4fd",
-    marginBottom: "28px",
-    letterSpacing: "-1px",
+    fontSize: 'clamp(40px, 5.5vw, 68px)', fontWeight: 800, lineHeight: 1.1,
+    color: '#e8f4fd', marginBottom: '28px', letterSpacing: '-1px',
   },
   accent: {
-    background: "linear-gradient(90deg, #48cae4, #00b4d8, #0096c7)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    backgroundClip: "text",
+    background: 'linear-gradient(90deg, #48cae4, #00b4d8, #0096c7)',
+    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
   },
   heroSub: {
-    fontSize: "17px",
-    lineHeight: 1.75,
-    color: "rgba(200,230,255,0.72)",
-    marginBottom: "44px",
+    fontSize: '17px', lineHeight: 1.75, color: 'rgba(200,230,255,0.72)', marginBottom: '44px',
   },
   ctaBtn: {
-    display: "block",
-    alignItems: "center",
-    padding: "17px 42px",
-    background: "linear-gradient(135deg, #0096c7, #00b4d8)",
-    color: "#fff",
-    border: "none",
-    borderRadius: "50px",
-    fontSize: "16px",
-    fontWeight: 700,
-    cursor: "pointer",
-    letterSpacing: "0.5px",
-    boxShadow: "0 8px 30px rgba(0,150,200,0.38)",
-    animation: "pulse 3s ease-in-out infinite",
-    marginBottom: "14px",
+    display: 'block', padding: '17px 42px',
+    background: 'linear-gradient(135deg, #0096c7, #00b4d8)',
+    color: '#fff', border: 'none', borderRadius: '50px',
+    fontSize: '16px', fontWeight: 700, cursor: 'pointer', letterSpacing: '0.5px',
+    boxShadow: '0 8px 30px rgba(0,150,200,0.38)',
+    animation: 'pulse 3s ease-in-out infinite', marginBottom: '14px',
   },
-  ctaNote: {
-    fontSize: "12px",
-    color: "rgba(180,210,240,0.45)",
-    letterSpacing: "0.5px",
-    marginTop: "12px",
-  },
+  ctaNote: { fontSize: '12px', color: 'rgba(180,210,240,0.45)', letterSpacing: '0.5px', marginTop: '12px' },
   heroRight: {
-    flex: 1,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    animation: "floatSlow 6s ease-in-out infinite",
+    flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center',
+    animation: 'floatSlow 6s ease-in-out infinite',
   },
   animalOrb: {
-    width: "300px",
-    height: "300px",
-    borderRadius: "50%",
-    background:
-      "radial-gradient(circle at 35% 35%, rgba(0,150,200,0.22), rgba(0,30,80,0.65))",
-    border: "1px solid rgba(72,202,228,0.22)",
-    boxShadow:
-      "0 0 80px rgba(0,150,200,0.18), inset 0 0 60px rgba(0,100,160,0.1)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    width: '300px', height: '300px', borderRadius: '50%',
+    background: 'radial-gradient(circle at 35% 35%, rgba(0,150,200,0.22), rgba(0,30,80,0.65))',
+    border: '1px solid rgba(72,202,228,0.22)',
+    boxShadow: '0 0 80px rgba(0,150,200,0.18), inset 0 0 60px rgba(0,100,160,0.1)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
-  orbEmoji: {
-    fontSize: "110px",
-    filter: "drop-shadow(0 0 28px rgba(72,202,228,0.45))",
-  },
+  orbEmoji: { fontSize: '110px', filter: 'drop-shadow(0 0 28px rgba(72,202,228,0.45))' },
   depthRow: {
-    position: "relative",
-    zIndex: 5,
-    display: "flex",
-    alignItems: "center",
-    gap: "14px",
-    padding: "0 48px",
-    marginBottom: "80px",
+    position: 'relative', zIndex: 5,
+    display: 'flex', alignItems: 'center', gap: '14px',
+    padding: '0 48px', marginBottom: '80px',
   },
-  depthTag: {
-    fontSize: "10px",
-    color: "rgba(100,180,220,0.35)",
-    letterSpacing: "2px",
-    whiteSpace: "nowrap",
-  },
-  depthLine: {
-    flex: 1,
-    height: "1px",
-    background: "linear-gradient(90deg, rgba(72,202,228,0.25), transparent)",
-  },
+  depthTag: { fontSize: '10px', color: 'rgba(100,180,220,0.35)', letterSpacing: '2px', whiteSpace: 'nowrap' },
+  depthLine: { flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(72,202,228,0.25), transparent)' },
   groupsSection: {
-    position: "relative",
-    zIndex: 5,
-    padding: "0 48px 90px",
-    textAlign: "center",
+    position: 'relative', zIndex: 5, padding: '0 48px 90px',
+    textAlign: 'center', scrollMarginTop: '80px',
   },
   sectionTitle: {
-    fontSize: "clamp(22px, 2.8vw, 34px)",
-    fontWeight: 700,
-    color: "#e8f4fd",
-    marginBottom: "12px",
+    fontSize: 'clamp(22px, 2.8vw, 34px)', fontWeight: 700, color: '#e8f4fd', marginBottom: '12px',
   },
-  sectionSub: {
-    fontSize: "15px",
-    color: "rgba(180,220,255,0.55)",
-    marginBottom: "52px",
-  },
+  sectionSub: { fontSize: '15px', color: 'rgba(180,220,255,0.55)', marginBottom: '52px' },
   groupGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-    gap: "22px",
-    maxWidth: "920px",
-    margin: "0 auto 44px",
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+    gap: '22px', maxWidth: '920px', margin: '0 auto 44px',
   },
   groupCard: {
-    background:
-      "linear-gradient(145deg, rgba(10,30,70,0.75), rgba(5,18,45,0.9))",
-    border: "1px solid rgba(72,202,228,0.13)",
-    borderRadius: "20px",
-    padding: "34px 22px",
-    textAlign: "center",
-    transition: "transform 0.22s, border-color 0.22s",
+    background: 'linear-gradient(145deg, rgba(10,30,70,0.75), rgba(5,18,45,0.9))',
+    border: '1px solid rgba(72,202,228,0.13)', borderRadius: '20px',
+    padding: '34px 22px', textAlign: 'center',
+    transition: 'transform 0.22s, border-color 0.22s',
   },
-  groupEmoji: {
-    fontSize: "50px",
-    marginBottom: "14px",
-    filter: "drop-shadow(0 0 10px rgba(72,202,228,0.28))",
-  },
-  groupName: {
-    fontSize: "17px",
-    fontWeight: 700,
-    color: "#90e0ef",
-    marginBottom: "10px",
-    letterSpacing: "1px",
-  },
-  groupDesc: {
-    fontSize: "13px",
-    color: "rgba(180,220,255,0.6)",
-    lineHeight: 1.65,
-  },
+  groupEmoji: { fontSize: '50px', marginBottom: '14px', filter: 'drop-shadow(0 0 10px rgba(72,202,228,0.28))' },
+  groupName: { fontSize: '17px', fontWeight: 700, color: '#90e0ef', marginBottom: '10px', letterSpacing: '1px' },
+  groupDesc: { fontSize: '13px', color: 'rgba(180,220,255,0.6)', lineHeight: 1.65 },
   outlineBtn: {
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "13px 34px",
-    background: "transparent",
-    color: "#48cae4",
-    border: "1.5px solid rgba(72,202,228,0.45)",
-    borderRadius: "50px",
-    fontSize: "14px",
-    fontWeight: 600,
-    cursor: "pointer",
-    letterSpacing: "0.5px",
+    display: 'inline-flex', alignItems: 'center', padding: '13px 34px',
+    background: 'transparent', color: '#48cae4',
+    border: '1.5px solid rgba(72,202,228,0.45)', borderRadius: '50px',
+    fontSize: '14px', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.5px',
   },
   aboutSection: {
-    position: "relative",
-    zIndex: 5,
-    padding: "60px 48px 90px",
-    maxWidth: "780px",
-    margin: "0 auto",
+    position: 'relative', zIndex: 5, padding: '60px 48px 90px',
+    maxWidth: '780px', margin: '0 auto',
   },
   aboutLabel: {
-    fontSize: "11px",
-    fontWeight: 600,
-    letterSpacing: "3px",
-    textTransform: "uppercase",
-    color: "rgba(100,180,220,0.45)",
-    marginBottom: "52px",
+    fontSize: '11px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase',
+    color: 'rgba(100,180,220,0.45)', marginBottom: '52px',
   },
   aboutRow: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "28px",
-    marginBottom: "56px",
-    animation: "fadeIn 1s ease both",
+    display: 'flex', alignItems: 'flex-start', gap: '28px', marginBottom: '56px',
+    animation: 'fadeIn 1s ease both',
   },
   aboutIcon: {
-    fontSize: "36px",
-    flexShrink: 0,
-    width: "60px",
-    height: "60px",
-    background: "rgba(10,28,65,0.8)",
-    borderRadius: "14px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "1px solid rgba(72,202,228,0.12)",
+    fontSize: '36px', flexShrink: 0, width: '60px', height: '60px',
+    background: 'rgba(10,28,65,0.8)', borderRadius: '14px',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    border: '1px solid rgba(72,202,228,0.12)',
   },
   aboutText: { flex: 1 },
-  aboutTitle: {
-    fontSize: "19px",
-    fontWeight: 700,
-    color: "#e8f4fd",
-    marginBottom: "10px",
-  },
-  aboutBody: {
-    fontSize: "14px",
-    color: "rgba(180,220,255,0.62)",
-    lineHeight: 1.72,
-  },
+  aboutTitle: { fontSize: '19px', fontWeight: 700, color: '#e8f4fd', marginBottom: '10px' },
+  aboutBody: { fontSize: '14px', color: 'rgba(180,220,255,0.62)', lineHeight: 1.72 },
   footer: {
-    position: "relative",
-    zIndex: 5,
-    textAlign: "center",
-    padding: "38px 48px",
-    borderTop: "1px solid rgba(72,202,228,0.07)",
+    position: 'relative', zIndex: 5, textAlign: 'center',
+    padding: '38px 48px', borderTop: '1px solid rgba(72,202,228,0.07)',
+    scrollMarginTop: '80px',
   },
-  footerMain: {
-    fontSize: "12px",
-    color: "rgba(150,200,230,0.38)",
-    marginBottom: "6px",
-    letterSpacing: "0.5px",
+  footerMain: { fontSize: '12px', color: 'rgba(150,200,230,0.38)', marginBottom: '6px', letterSpacing: '0.5px' },
+  footerSub:  { fontSize: '11px', color: 'rgba(100,160,200,0.28)', letterSpacing: '0.5px', marginBottom: '10px' },
+  footerContact: { fontSize: '12px', color: 'rgba(150,200,230,0.45)' },
+
+  // Modal
+  modalOverlay: {
+    position: 'fixed', inset: 0, zIndex: 100,
+    background: 'rgba(2,8,20,0.85)',
+    backdropFilter: 'blur(6px)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    padding: '24px',
   },
-  footerSub: {
-    fontSize: "11px",
-    color: "rgba(100,160,200,0.28)",
-    letterSpacing: "0.5px",
+  modalCard: {
+    position: 'relative',
+    background: 'linear-gradient(145deg, #0a1e4a, #050f28)',
+    border: '1px solid rgba(72,202,228,0.2)',
+    borderRadius: '24px',
+    padding: '44px 48px 36px',
+    width: '100%', maxWidth: '420px',
+    boxShadow: '0 32px 80px rgba(0,0,0,0.6)',
+  },
+  modalTabs: {
+    display: 'flex', gap: '4px',
+    background: 'rgba(255,255,255,0.04)', borderRadius: '12px',
+    padding: '4px', marginBottom: '28px',
+  },
+  modalTab: {
+    flex: 1, padding: '9px 0',
+    background: 'transparent', border: 'none',
+    borderRadius: '9px', color: 'rgba(200,230,255,0.45)',
+    fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  modalTabActive: {
+    background: 'rgba(72,202,228,0.15)',
+    color: '#90e0ef',
+  },
+  modalTitle: {
+    fontSize: '22px', fontWeight: 800, color: '#e8f4fd', marginBottom: '8px',
+  },
+  modalSub: {
+    fontSize: '13px', color: 'rgba(180,220,255,0.55)', lineHeight: 1.6, marginBottom: '28px',
+  },
+  modalForm: { display: 'flex', flexDirection: 'column', gap: '6px' },
+  inputLabel: { fontSize: '12px', fontWeight: 600, color: 'rgba(150,200,240,0.6)', letterSpacing: '0.5px' },
+  input: {
+    padding: '12px 16px', marginBottom: '12px',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(72,202,228,0.2)', borderRadius: '10px',
+    color: '#e8f4fd', fontSize: '15px', outline: 'none',
+    transition: 'border-color 0.2s',
+  },
+  authError: {
+    fontSize: '13px', color: '#f87171', marginBottom: '8px', lineHeight: 1.5,
+  },
+  authBtn: {
+    marginTop: '4px', padding: '14px',
+    background: 'linear-gradient(135deg, #0096c7, #00b4d8)',
+    border: 'none', borderRadius: '12px',
+    color: '#fff', fontSize: '15px', fontWeight: 700, cursor: 'pointer',
+    transition: 'opacity 0.2s',
+  },
+  modalSwitch: {
+    textAlign: 'center', marginTop: '20px',
+    fontSize: '13px', color: 'rgba(180,220,255,0.45)',
+  },
+  modalClose: {
+    position: 'absolute', top: '16px', right: '18px',
+    background: 'none', border: 'none',
+    color: 'rgba(200,230,255,0.35)', fontSize: '18px', cursor: 'pointer',
+    lineHeight: 1,
   },
 };

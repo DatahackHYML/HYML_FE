@@ -191,43 +191,51 @@ export default function Quiz() {
 }
 
 function localScore(answers) {
-  const dim = (start) => {
+  // Each dimension: count A answers in the 4-question block
+  const majority = (start, aVal, bVal) => {
     const slice = answers.slice(start, start + 4);
-    const aCount = slice.filter(x => x === 'A').length;
-    return aCount >= 2 ? 'A' : 'B';
+    return slice.filter(x => x === 'A').length >= 2 ? aVal : bVal;
   };
-  const d1 = dim(0);  // A=Deep, B=Reef
-  const d2 = dim(4);  // A=Current, B=Tide
-  const d3 = dim(8);  // A=Predator, B=Nurturer
-  const d4 = dim(12); // A=Structured, B=Flowing
+
+  const d1 = majority(0,  'D', 'R');  // Deep / Reef
+  const d2 = majority(4,  'C', 'R');  // Current / Tide → T normalized to R
+  const d3 = majority(8,  'P', 'N');  // Predator / Nurturer
+  const d4 = majority(12, 'S', 'F');  // Structured / Flowing
+
+  const code = `${d1}${d2}${d3}${d4}`;
+
+  // Group: determined solely by D1 and D3
+  const group = { DP: 'Hunters', DN: 'Wanderers', RP: 'Guardians', RN: 'Builders' }[`${d1}${d3}`];
 
   const codeMap = {
-    AAPA: { animal: 'Great White Shark', group: 'Hunters',   emoji: '🦈', code: 'DCPS' },
-    AAPB: { animal: 'Hammerhead Shark',  group: 'Hunters',   emoji: '🦈', code: 'DCPF' },
-    AABА: { animal: 'Orca',              group: 'Hunters',   emoji: '🐋', code: 'DCNS' },
-    AABB: { animal: 'Manta Ray',         group: 'Wanderers', emoji: '🐟', code: 'DCNF' },
-    ABPA: { animal: 'Barracuda',         group: 'Hunters',   emoji: '🐟', code: 'DTPS' },
-    ABPB: { animal: 'Swordfish',         group: 'Wanderers', emoji: '🐟', code: 'DTPF' },
-    ABBA: { animal: 'Dolphin',           group: 'Wanderers', emoji: '🐬', code: 'DTNS' },
-    ABBB: { animal: 'Sea Horse',         group: 'Wanderers', emoji: '🐟', code: 'DTNF' },
-    BAPA: { animal: 'Blue Whale',        group: 'Guardians', emoji: '🐳', code: 'RCPS' },
-    BAPB: { animal: 'Mantis Shrimp',     group: 'Builders',  emoji: '🦐', code: 'RCPF' },
-    BABA: { animal: 'Sea Turtle',        group: 'Guardians', emoji: '🐢', code: 'RCNS' },
-    BABB: { animal: 'Manatee',           group: 'Guardians', emoji: '🐟', code: 'RCNF' },
-    BBPA: { animal: 'Octopus',           group: 'Builders',  emoji: '🐙', code: 'RTPS' },
-    BBPB: { animal: 'Clownfish',         group: 'Builders',  emoji: '🐠', code: 'RTPF' },
-    BBBA: { animal: 'Starfish',          group: 'Guardians', emoji: '⭐', code: 'RTNS' },
-    BBBB: { animal: 'Jellyfish',         group: 'Wanderers', emoji: '🪼', code: 'RTNF' },
+    DCPS: { animal: 'Great White Shark', emoji: '🦈' },
+    DCPF: { animal: 'Barracuda',         emoji: '🐟' },
+    DCNS: { animal: 'Moray Eel',         emoji: '🐍' },
+    DCNF: { animal: 'Mantis Shrimp',     emoji: '🦐' },
+    DRPS: { animal: 'Sea Turtle',        emoji: '🐢' },
+    DRPF: { animal: 'Manta Ray',         emoji: '🐡' },
+    DRNS: { animal: 'Flying Fish',       emoji: '🐟' },
+    DRNF: { animal: 'Jellyfish',         emoji: '🪼' },
+    RCPS: { animal: 'Humpback Whale',    emoji: '🐳' },
+    RCPF: { animal: 'Dolphin',           emoji: '🐬' },
+    RCNS: { animal: 'Octopus',           emoji: '🐙' },
+    RCNF: { animal: 'Seahorse',          emoji: '🐠' },
+    RRPS: { animal: 'Clownfish',         emoji: '🐠' },
+    RRPF: { animal: 'Sea Otter',         emoji: '🦦' },
+    RRNS: { animal: 'Hermit Crab',       emoji: '🦀' },
+    RRNF: { animal: 'Coral Polyp',       emoji: '🪸' },
   };
 
-  const key = `${d1}${d2}${d3}${d4}`;
-  const match = codeMap[key] || codeMap['BBBA'];
+  const match = codeMap[code] || codeMap['RCNS'];
+
+  console.log('[localScore] answers:', answers);
+  console.log(`[localScore] D1=${d1} D2=${d2} D3=${d3} D4=${d4} → code=${code} → ${match.animal} (${group})`);
 
   return {
     animal: match.animal,
-    group: match.group,
-    emoji: match.emoji,
-    code: match.code,
+    group,
+    emoji:  match.emoji,
+    code,
     description: `As a ${match.animal}, you navigate life with a unique current. Your ocean personality shapes how you connect, decide, and move through the world.`,
   };
 }

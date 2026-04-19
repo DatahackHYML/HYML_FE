@@ -546,7 +546,7 @@ export default function Result() {
         ) {
           setSignupError("This email is already registered. Please use a different email.");
         } else {
-          setSignupError(authError.message);
+          setSignupError("Sign up failed. Please try again.");
         }
         return;
       }
@@ -592,7 +592,7 @@ export default function Result() {
         },
       });
     } catch (err) {
-      setSignupError(err.message);
+      setSignupError("Something went wrong. Please try again.");
     }
   }
 

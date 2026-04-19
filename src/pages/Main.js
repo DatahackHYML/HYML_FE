@@ -299,7 +299,7 @@ export default function Main() {
         ({ error } = await supabase.auth.signUp({ email, password }));
       }
       if (error) {
-        setAuthErr(error.message);
+        setAuthErr(tab === 'signin' ? 'Incorrect email or password.' : 'Sign up failed. Please try again.');
       } else {
         setModal(false);
         let savedGroup = 'Guardians';

@@ -1239,30 +1239,19 @@ function IconAttend() {
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const myGroup =
-    location.state?.group ||
-    (() => {
-      try {
-        return (
-          JSON.parse(localStorage.getItem("hymlSignup") || "{}").group ||
-          "Guardians"
-        );
-      } catch {
-        return "Guardians";
-      }
-    })();
-  const myAnimalEmoji =
-    location.state?.animalEmoji ||
-    (() => {
-      try {
-        return (
-          JSON.parse(localStorage.getItem("hymlSignup") || "{}").animalEmoji ||
-          null
-        );
-      } catch {
-        return null;
-      }
-    })();
+
+  // 1. Grab everything we know about the user from local storage
+  const signupData = (() => {
+    try { return JSON.parse(localStorage.getItem("hymlSignup") || "{}"); }
+    catch { return {}; }
+  })();
+
+  // 2. Set our variables
+  const myGroup = location.state?.group || signupData.group || "Guardians";
+  const myAnimalEmoji = location.state?.animalEmoji || signupData.animalEmoji || null;
+  const myAnimal = location.state?.animal || signupData.animal || null;
+  const myCode = location.state?.code || signupData.code || null;
+  const myUserName = location.state?.userName || signupData.name || null;
 
   const [leaderboard, setLeaderboard] = useState(null);
   const [events, setEvents] = useState(null);
@@ -1409,7 +1398,13 @@ export default function Dashboard() {
             title="My Profile"
             onClick={() =>
               navigate("/mypage", {
-                state: { group: myGroup, animalEmoji: myAnimalEmoji },
+                state: { 
+                  group: myGroup, 
+                  animalEmoji: myAnimalEmoji,
+                  animal: myAnimal,
+                  code: myCode,
+                  userName: myUserName
+                },
               })
             }
           >
@@ -1489,7 +1484,13 @@ export default function Dashboard() {
             title="Go to My Profile"
             onClick={() =>
               navigate("/mypage", {
-                state: { group: myGroup, animalEmoji: myAnimalEmoji },
+                state: { 
+                  group: myGroup, 
+                  animalEmoji: myAnimalEmoji,
+                  animal: myAnimal,
+                  code: myCode,
+                  userName: myUserName
+                },
               })
             }
           >

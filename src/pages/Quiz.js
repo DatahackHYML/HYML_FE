@@ -53,13 +53,16 @@ export default function Quiz() {
       } else {
         setAnswers(newAnswers);
         setLoading(true);
+        const scores = [0, 1, 2, 3].map(d =>
+          newAnswers.slice(d * 4, d * 4 + 4).filter(x => x === 'A').length
+        );
         try {
           const result = await scoreQuiz(newAnswers);
-          navigate('/result', { state: { result } });
+          navigate('/result', { state: { result, scores } });
         } catch (err) {
           // Fallback: local scoring so the app still works
           const result = localScore(newAnswers);
-          navigate('/result', { state: { result } });
+          navigate('/result', { state: { result, scores } });
         }
       }
     }, 320);

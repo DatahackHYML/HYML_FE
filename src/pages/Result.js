@@ -51,6 +51,203 @@ const GROUP_COLORS = {
   Builders:  { primary:'#8b5cf6', secondary:'#c4b5fd', bg:'rgba(139,92,246,0.1)'  },
 };
 
+// ─── Personality data for all 16 animals ─────────────────────────────────────
+
+const ANIMAL_DATA = {
+  'Great White Shark': {
+    nickname: "The Apex Architect",
+    strengths: ["Decisive", "Analytical", "Disciplined", "Strategic"],
+    description: "You are the ocean's most efficient predator — not through aggression, but through precision and relentless focus. Logic is your first language; structure is your competitive edge. You plan before you act, and when you move, you rarely miss. Your depth of mind gives you access to insights others never surface.",
+    parallels: "Great white sharks conserve energy between hunts, striking only when conditions are perfect. Like them, you don't waste effort — you accumulate it until the moment demands everything. Think chess grandmasters, elite engineers, and scientists who solve what others abandon.",
+    interactions: {
+      Hunters:   "Immediate mutual respect — you share the same drive for results and efficiency. Competition between you is productive rather than destructive.",
+      Wanderers: "They bring spontaneity that sharpens your rigid edges. You give them the structure they secretly crave. Friction here is generative.",
+      Builders:  "You admire their ingenuity; they respect your decisiveness. Together you execute complex work from vision to completion without flinching.",
+      Guardians: "Their patience complements your urgency. They remind you that the mission matters beyond the metrics — an important recalibration.",
+    },
+  },
+  'Hammerhead Shark': {
+    nickname: "The Tactical Nomad",
+    strengths: ["Observant", "Decisive", "Adaptable", "Tenacious"],
+    description: "You possess the hunter's instinct but refuse to be contained. Like the hammerhead's wide-set eyes, you see angles others miss — then act on them with conviction. You're driven by outcomes, but you find your own path to them. Spontaneous strategy is your most dangerous superpower.",
+    parallels: "Hammerhead sharks use their uniquely shaped heads to sense electromagnetic fields other sharks cannot detect. You pick up signals in any environment that others overlook, turning raw observation into decisive, well-timed action.",
+    interactions: {
+      Hunters:   "Fellow outcome-focused predators who respect your lateral thinking. You bring a fresh angle to group strategy that keeps everyone unpredictable.",
+      Wanderers: "A natural kinship — both free-roaming, both results-minded. You push each other toward bolder leaps than either would take alone.",
+      Builders:  "They appreciate your ability to improvise around constraints. You may clash on planning style, but deep mutual respect is underneath.",
+      Guardians: "Their steadiness grounds your nomadic energy. You protect their causes; they protect your blind spots.",
+    },
+  },
+  'Orca': {
+    nickname: "The Strategic Protector",
+    strengths: ["Empathetic", "Strategic", "Loyal", "Leadership"],
+    description: "You combine the hunter's mind with the guardian's heart — a rare and powerful pairing. Orcas don't just hunt; they teach, coordinate, and remember across generations. You are driven by logic but guided by the bonds you build. Structure keeps your world safe; the people within it are the reason you maintain it.",
+    parallels: "Orca pods are matriarchal societies with decades of shared cultural memory. You're the person who remembers everyone's strengths, who held the team together during the hard quarter, who never lets strategy become cold.",
+    interactions: {
+      Hunters:   "You speak their language but bring the emotional intelligence they often lack. They follow your lead when trust is established.",
+      Wanderers: "Your structure can feel restrictive to them, but your genuine care disarms resistance. Give them ownership within your frame.",
+      Builders:  "Deep mutual respect — you value their craft, they value your vision. An ideal co-leadership pairing.",
+      Guardians: "Your strongest alliance. Both loyal, patient, and mission-driven — together you are nearly unstoppable.",
+    },
+  },
+  'Manta Ray': {
+    nickname: "The Deep Empath",
+    strengths: ["Perceptive", "Empathetic", "Reflective", "Adaptable"],
+    description: "You glide through depth and current with effortless grace, processing the world through feeling and pattern. You prefer to move with life rather than against it. Solitude restores you; genuine connection fulfills you. People are drawn to your calm and your uncanny ability to understand them without judgment.",
+    parallels: "Manta rays filter thousands of gallons of water, retaining only what nourishes them. You do the same with experience — filtering out noise, keeping meaning. Often described as the kind of person others call at 2am.",
+    interactions: {
+      Hunters:   "Your depth gives them something to think about. They're drawn to your stillness and helped to slow down long enough to see what they've been swimming past.",
+      Wanderers: "A kindred soul. Both of you sense more than you say. Conversations together go places others never reach.",
+      Builders:  "Your emotional insight helps them build things that actually matter to people — not just things that technically work.",
+      Guardians: "Beautifully aligned. You both care without condition and think in long arcs. A quiet but powerful pairing.",
+    },
+  },
+  'Barracuda': {
+    nickname: "The Visionary Hunter",
+    strengths: ["Intuitive", "Bold", "Focused", "Structured"],
+    description: "You see the future others can't yet perceive, and you hunt it with a plan. Your gut-level pattern recognition is your compass, but execution is structured and deliberate. Others may call you intense — you call it clarity. You want to be three moves ahead, with the discipline to capitalize when the moment arrives.",
+    parallels: "The barracuda targets prey from distance, then closes with astonishing speed — foresight and explosive execution combined. Think founders who sensed a market shift before the data confirmed it, then were ready when it arrived.",
+    interactions: {
+      Hunters:   "Competitive respect — you each hunt differently. Find common ground in outcomes rather than debating method.",
+      Wanderers: "They love your vision but resist your structure. Give them creative latitude within your strategic frame and watch what happens.",
+      Builders:  "Your vision gives them a target; their craft turns your instincts into reality. A high-output pairing.",
+      Guardians: "They ground your intensity with wisdom. Listen to them — they see risks that your speed creates before you do.",
+    },
+  },
+  'Swordfish': {
+    nickname: "The Bold Pioneer",
+    strengths: ["Courageous", "Visionary", "Independent", "Intense"],
+    description: "You were made to move through uncharted water. Swordfish dive to crushing depths without a plan, trusting their power to carry them through — and you operate the same way: vision-led, pressure-tested, radically free. Structure feels like a cage. You innovate best when no one has defined where the finish line is.",
+    parallels: "Swordfish are among the fastest fish alive, capable of 97km/h bursts into the deep. You bring that same explosive energy to ideas and decisions. Artistic directors, explorers, and innovators who disrupt entire fields by refusing to accept the existing map.",
+    interactions: {
+      Hunters:   "Fellow intensity, different approach. They plan; you improvise. Together you're formidable when you respect the difference rather than competing over it.",
+      Wanderers: "Your most natural alliance — both value freedom and exploration. Partnerships here feel alive in a way others rarely do.",
+      Builders:  "They can channel your boldness into tangible breakthroughs. Don't dismiss their process — it's what turns your vision into reality.",
+      Guardians: "You challenge their comfort zones. They protect you from the consequences of your own velocity. Balance each other out.",
+    },
+  },
+  'Dolphin': {
+    nickname: "The Insightful Connector",
+    strengths: ["Empathetic", "Curious", "Organized", "Collaborative"],
+    description: "You are the rarest combination: genuinely deep and genuinely playful. Dolphins dive into dark waters and leap into sunlight with equal ease. You move between inner reflection and outer connection without losing either. You understand people at the level of their actual needs — not what they say, but what they mean — and you bring enough structure to turn that care into action.",
+    parallels: "Dolphins are one of the few species that help others outside their own kind — rescuing swimmers, befriending whales. You're the person who checks in on everyone, who remembers the details, who makes the connections that move the whole network forward.",
+    interactions: {
+      Hunters:   "You soften their edges without dulling their effectiveness. They quietly learn from watching how you make people feel valued.",
+      Wanderers: "Your kindred spirits. You bring slightly more structure; they bring slightly more spontaneity. The overlap is rich and productive.",
+      Builders:  "You provide the human insight that makes their creations land emotionally. A necessary and deeply valued partnership.",
+      Guardians: "Deep mutual affinity. Both of you care at scale. The combination is quiet, consistent, and a genuine force for change.",
+    },
+  },
+  'Sea Horse': {
+    nickname: "The Gentle Dreamer",
+    strengths: ["Imaginative", "Empathetic", "Patient", "Authentic"],
+    description: "You drift with intention. Sea horses don't swim fast — they anchor with their tails and observe. You understand that stillness is not weakness; it is wisdom. You dream in images, feel in layers, and move through the world with an authenticity that draws people in without effort. You are the calm center in someone else's storm.",
+    parallels: "Sea horses are among the most patient hunters in the ocean, waiting perfectly still for prey to drift within range. Like them, you know that what matters most comes to you when you're truly present — not when you chase it.",
+    interactions: {
+      Hunters:   "They admire your calm, even when they don't understand it. You show them a kind of strength that doesn't announce itself.",
+      Wanderers: "Fellow dreamers who validate your inner world without requiring explanation. These relationships feel easy and deeply meaningful.",
+      Builders:  "They help you manifest what you imagine. You help them stay connected to the why behind what they build.",
+      Guardians: "A natural home. Your gentleness and their stability create something rare: a space where people can just be.",
+    },
+  },
+  'Blue Whale': {
+    nickname: "The Steadfast Commander",
+    strengths: ["Decisive", "Principled", "Reliable", "Grounded"],
+    description: "You are the largest force in any room — not through volume, but through presence and consistency. Blue whales don't fight for position; they simply exist at a scale that reshapes the ocean around them. You set direction with facts, operate with structure, and your reliability is your reputation. People follow you because you have never let them down.",
+    parallels: "The blue whale's heartbeat is so low-frequency it can be heard two miles away. You operate at a frequency others feel before they understand it — steady, deep, undeniable. The person organizations and communities quietly build around.",
+    interactions: {
+      Hunters:   "You share decisiveness. They move faster; you move farther. Mutual respect is immediate and enduring.",
+      Wanderers: "Your groundedness is exactly what they need when they've drifted too far. You bring them back without making them feel diminished.",
+      Builders:  "Your structured thinking gives their creativity direction. An effective executive-creative partnership with high output.",
+      Guardians: "Deep kinship — both of you think in the long term and care about what endures beyond any single project.",
+    },
+  },
+  'Mantis Shrimp': {
+    nickname: "The Adaptive Innovator",
+    strengths: ["Creative", "Perceptive", "Resourceful", "Decisive"],
+    description: "You see sixteen color channels where others see three. The mantis shrimp is the ocean's most underestimated genius — overlooked until it strikes with the force of a bullet. You combine social fluency with an explosive creative mind, solving problems others haven't learned to see yet, and doing it faster than anyone expects.",
+    parallels: "The mantis shrimp's punch generates cavitation bubbles hitting with 1500 Newtons of force. You hit problems that hard — sudden, thorough, and with elegant precision. Engineers and designers who combine aesthetic intelligence with analytical firepower.",
+    interactions: {
+      Hunters:   "They respect your decisiveness; you respect their focus. Combine for high-precision execution that neither could achieve alone.",
+      Wanderers: "You both love novelty but approach it differently. Wanderers inspire your next unexpected breakthrough.",
+      Builders:  "Your natural tribe. Creative, technical, ambitious — together you build things that shouldn't exist yet, but do.",
+      Guardians: "Their patience grounds your reactive energy. You benefit most from listening to them before you strike.",
+    },
+  },
+  'Sea Turtle': {
+    nickname: "The Ancient Guardian",
+    strengths: ["Patient", "Wise", "Dependable", "Empathetic"],
+    description: "You carry thousands of years of ocean memory in your bones. Sea turtles have outlasted mass extinctions by knowing exactly what matters and ignoring everything else. You are steady where others panic, consistent where others drift. You protect quietly — not through force, but through unwavering presence. People don't always notice your support until it's gone.",
+    parallels: "Sea turtles navigate back to the exact beach where they were born — across decades and thousands of miles of open ocean. You have the same homing instinct: your values are your coordinates, and you never truly lose your way.",
+    interactions: {
+      Hunters:   "Your wisdom complements their speed. They make things happen quickly; you make sure those things actually last.",
+      Wanderers: "You offer them a safe harbor they didn't know they needed. They bring you joy that you sometimes forget to seek.",
+      Builders:  "You understand the long arc; they build within it. Together you create work with lasting rather than fleeting impact.",
+      Guardians: "A deeply aligned union. You both know that the most important work is done quietly, over time, without announcement.",
+    },
+  },
+  'Manatee': {
+    nickname: "The Peaceful Wanderer",
+    strengths: ["Compassionate", "Open-Minded", "Gentle", "Intuitive"],
+    description: "You move through life without agenda — curious, warm, and deeply at peace with yourself. Manatees evolved without natural predators because they chose harmony over conflict. You bring that same quality: you don't fight the current, you become it. People feel immediately safe around you, and you offer connection without conditions attached.",
+    parallels: "Manatees communicate through sounds barely audible to humans — subtle, constant, meaningful below the noise. You communicate most effectively the same way: the check-in text, the remembered detail, the quiet presence that turns out to matter more than anyone said.",
+    interactions: {
+      Hunters:   "You disarm their intensity in ways that genuinely surprise them. They need you more than they would ever admit.",
+      Wanderers: "Together you drift beautifully through experience. Some of your best memories and stories will come from this combination.",
+      Builders:  "Your warmth makes their creative spaces feel genuinely human. They value your presence more than they express.",
+      Guardians: "Your most natural home. The quiet care you give and receive here sustains everything else you do.",
+    },
+  },
+  'Octopus': {
+    nickname: "The Creative Mastermind",
+    strengths: ["Strategic", "Creative", "Adaptable", "Independent"],
+    description: "You are the ocean's most intelligent shapeshifter. Octopuses have three hearts, blue blood, and a neural cluster in every arm — and so do you, in a sense. You solve problems from multiple directions simultaneously, camouflage your true strategy until the perfect moment, and create solutions so lateral that no one else saw the angle. Your mind is your greatest instrument.",
+    parallels: "Octopuses are one of the only invertebrates that use tools — collecting shells, using coconut halves as portable armor. You build solutions from whatever is available, turning constraints into creative advantages. Polymaths and system designers who disrupt by recombining.",
+    interactions: {
+      Hunters:   "You respect their decisiveness; they respect your cleverness. Combine your approaches for execution that operates at a different level entirely.",
+      Wanderers: "You share curiosity but differ in focus. They bring color; you bring structure to it. A rich and productive creative partnership.",
+      Builders:  "Your natural home. You think alike, build alike, and challenge each other in exactly the ways that matter.",
+      Guardians: "They provide the emotional stability that lets your mind roam freely. Don't underestimate how much this relationship enables.",
+    },
+  },
+  'Clownfish': {
+    nickname: "The Spirited Innovator",
+    strengths: ["Enthusiastic", "Resilient", "Creative", "Collaborative"],
+    description: "You thrive in symbiosis — like the clownfish and the anemone, you create mutual benefit everywhere you go. You bring energy, ideas, and a willingness to try things that haven't been tried. Structure can feel limiting, but you're not chaotic — you're adaptive. People feel more creative around you because you make experimentation feel safe rather than reckless.",
+    parallels: "Clownfish are immune to their anemone's venom through a unique biological adaptation — turning what kills others into their home. You have that same talent for thriving in environments that challenge others, and for finding safety in exactly what looks most dangerous.",
+    interactions: {
+      Hunters:   "Your enthusiasm complements their direction. They provide the goal; you spontaneously find ten ways to get there.",
+      Wanderers: "Fellow free spirits who validate your approach. Creative partnerships here generate energy and output in equal measure.",
+      Builders:  "You inspire them to take risks they wouldn't otherwise take. They give your ideas roots. This combination actually ships things.",
+      Guardians: "Their steadiness gives you a foundation. You energize spaces they tend to keep too carefully stable.",
+    },
+  },
+  'Starfish': {
+    nickname: "The Quiet Anchor",
+    strengths: ["Dependable", "Organized", "Empathetic", "Patient"],
+    description: "You are quietly essential. Starfish reshape entire ecosystems without moving far — by existing steadily in place, they regulate what grows, what survives, what thrives around them. You operate the same way: structured, caring, and irreplaceable. You don't seek credit, but everything around you is better because you're in it.",
+    parallels: "Starfish can regenerate from a single arm. You recover, regroup, and return — resilient without drama, consistent without disappearing. The person who holds the team together through transitions, who never misses a deadline, who everyone quietly depends on.",
+    interactions: {
+      Hunters:   "You provide stability they use as a launch pad. They push you toward bolder action; you keep them from losing sight of what matters.",
+      Wanderers: "You offer structure they secretly need. They bring novelty into your careful world — receive it rather than managing it.",
+      Builders:  "Tremendous mutual respect. You execute; they innovate. Together you actually complete the things others only start.",
+      Guardians: "The deepest natural alliance. You both care without condition and build without requiring credit.",
+    },
+  },
+  'Jellyfish': {
+    nickname: "The Free Spirit",
+    strengths: ["Intuitive", "Adaptive", "Open-Hearted", "Peaceful"],
+    description: "You move with the current and find meaning in every direction. Jellyfish have no brain, no heart — only sensation, only now. You live in the present with a grace that others find both mysterious and magnetic. You don't impose, you don't compete — you flow. Your openness creates space for others to be exactly who they are.",
+    parallels: "Jellyfish are among the oldest animals on Earth — more than 500 million years of survival. Their simplicity is not a flaw; it is precisely why they outlasted almost everything else. You endure by refusing to be brittle, by bending where others break.",
+    interactions: {
+      Hunters:   "You puzzle them — and they need exactly that. You show them a way of being that their approach simply cannot access.",
+      Wanderers: "Your most natural kin. Together you drift into experiences that feel less like plans and more like coming home.",
+      Builders:  "They help you give form to your feelings. Let them — it doesn't diminish your freedom, it gives it somewhere to land.",
+      Guardians: "They cherish your openness. You help them feel the warmth that lives beneath their careful structures.",
+    },
+  },
+};
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function toX(lon) {
@@ -116,6 +313,7 @@ export default function Result() {
   const desc    = result?.description
     || `As a ${animal}, you navigate life with patience and wisdom. Your ocean personality shapes how you connect, protect, and move through the world.`;
   const colors  = GROUP_COLORS[group] || GROUP_COLORS.Guardians;
+  const scores  = location.state?.scores || [2, 2, 2, 2];
 
   // Fetch Argovis data
   useEffect(() => {
@@ -226,6 +424,16 @@ export default function Result() {
           Join the {group} &nbsp;→
         </button>
       </section>
+
+      {/* ── Personality divider ── */}
+      <div style={s.divider}>
+        <div style={s.dividerLine} />
+        <span style={s.dividerText}>Your Personality Profile</span>
+        <div style={s.dividerLine} />
+      </div>
+
+      {/* ── Personality Section ── */}
+      <PersonalitySection animal={animal} scores={scores} colors={colors} code={code} />
 
       {/* ── Divider ── */}
       <div style={s.divider}>
@@ -760,6 +968,202 @@ function DepthProfile({ profile, visible }) {
     </svg>
   );
 }
+
+// ─── Personality Section ─────────────────────────────────────────────────────
+
+function PersonalitySection({ animal, scores, colors, code }) {
+  const [animated, setAnimated] = useState(false);
+  const ref = useRef(null);
+  const data = ANIMAL_DATA[animal];
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) setAnimated(true); },
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  if (!data) return null;
+
+  const dims = [
+    { a: 'Deep',       b: 'Reef',      score: scores[0] },
+    { a: 'Current',    b: 'Tide',      score: scores[1] },
+    { a: 'Predator',   b: 'Nurturer',  score: scores[2] },
+    { a: 'Structured', b: 'Flowing',   score: scores[3] },
+  ];
+
+  return (
+    <section ref={ref} style={ps.section}>
+      {/* Header */}
+      <p style={ps.eyebrow}>Personality Profile</p>
+      <h2 style={{ ...ps.nickname, color: colors.secondary }}>{data.nickname}</h2>
+      <span style={{ ...ps.animalTag, color: colors.primary }}>{code} · {animal}</span>
+
+      {/* Dimension bars */}
+      <div style={ps.barsCard}>
+        <p style={ps.barsEyebrow}>Dimension Analysis</p>
+        {dims.map((d, i) => {
+          const pct = Math.round((d.score / 4) * 100);
+          const dominantA = d.score > 2;
+          const neutral   = d.score === 2;
+          const leftColor  = dominantA ? colors.secondary : neutral ? 'rgba(200,230,255,0.5)' : 'rgba(200,230,255,0.28)';
+          const rightColor = (!dominantA && !neutral) ? colors.secondary : neutral ? 'rgba(200,230,255,0.5)' : 'rgba(200,230,255,0.28)';
+          return (
+            <div key={i} style={ps.barRow}>
+              <span style={{ ...ps.barLabelLeft, color: leftColor }}>{d.a}</span>
+              <div style={ps.barTrack}>
+                <div style={{
+                  ...ps.barFill,
+                  width: animated ? `${pct}%` : '0%',
+                  background: `linear-gradient(90deg, ${colors.primary}cc, ${colors.secondary})`,
+                  transition: `width ${0.8 + i * 0.15}s ${i * 0.1}s ease`,
+                }} />
+              </div>
+              <span style={{ ...ps.barLabelRight, color: rightColor }}>{d.b}</span>
+              <span style={{ ...ps.barPct, color: colors.primary }}>{pct}%</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Strengths */}
+      <div style={ps.strengthsRow}>
+        <p style={ps.sectionLabel}>Core Strengths</p>
+        <div style={ps.badges}>
+          {data.strengths.map(str => (
+            <span key={str} style={{
+              ...ps.badge,
+              background: colors.bg,
+              borderColor: colors.primary + '55',
+              color: colors.secondary,
+            }}>
+              {str}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Description */}
+      <div style={ps.descCard}>
+        <p style={ps.descBody}>{data.description}</p>
+      </div>
+
+      {/* In the wild */}
+      <div style={ps.parallelsBlock}>
+        <p style={ps.sectionLabel}>In the Wild</p>
+        <p style={ps.parallelsBody}>{data.parallels}</p>
+      </div>
+
+      {/* Group interactions */}
+      <div style={ps.interactBlock}>
+        <p style={ps.sectionLabel}>How You Connect</p>
+        <div style={ps.interactGrid}>
+          {Object.entries(data.interactions).map(([grp, text]) => {
+            const gc = GROUP_COLORS[grp] || GROUP_COLORS.Guardians;
+            return (
+              <div key={grp} style={{
+                ...ps.interactCard,
+                background: gc.bg,
+                borderColor: gc.primary + '30',
+              }}>
+                <p style={{ ...ps.interactGroup, color: gc.primary }}>{grp}</p>
+                <p style={ps.interactText}>{text}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const ps = {
+  section: {
+    position: 'relative', zIndex: 5,
+    maxWidth: '860px', margin: '0 auto',
+    padding: '20px 48px 80px',
+    textAlign: 'center',
+  },
+  eyebrow: {
+    fontSize: '11px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase',
+    color: 'rgba(72,202,228,0.55)', marginBottom: '14px',
+  },
+  nickname: {
+    fontSize: 'clamp(24px, 3.5vw, 40px)', fontWeight: 800, marginBottom: '10px', letterSpacing: '-0.5px',
+  },
+  animalTag: {
+    display: 'block',
+    fontSize: '13px', fontWeight: 600, letterSpacing: '2px', fontFamily: 'monospace',
+    marginBottom: '44px',
+  },
+  barsCard: {
+    background: 'linear-gradient(145deg, rgba(8,24,58,0.85), rgba(4,14,36,0.92))',
+    border: '1px solid rgba(72,202,228,0.12)', borderRadius: '20px',
+    padding: '30px 36px 18px', marginBottom: '28px', textAlign: 'left',
+  },
+  barsEyebrow: {
+    fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase',
+    color: 'rgba(100,170,220,0.4)', marginBottom: '22px',
+  },
+  barRow: {
+    display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px',
+  },
+  barLabelLeft: {
+    fontSize: '13px', fontWeight: 600, minWidth: '88px', textAlign: 'right',
+    letterSpacing: '0.2px', transition: 'color 0.3s',
+  },
+  barLabelRight: {
+    fontSize: '13px', fontWeight: 600, minWidth: '88px', textAlign: 'left',
+    letterSpacing: '0.2px', transition: 'color 0.3s',
+  },
+  barTrack: {
+    flex: 1, height: '8px', background: 'rgba(255,255,255,0.07)',
+    borderRadius: '4px', overflow: 'hidden',
+  },
+  barFill: { height: '100%', borderRadius: '4px' },
+  barPct: {
+    fontSize: '12px', fontWeight: 700, fontVariantNumeric: 'tabular-nums',
+    minWidth: '38px', textAlign: 'right',
+  },
+  strengthsRow: { marginBottom: '28px' },
+  sectionLabel: {
+    fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase',
+    color: 'rgba(100,170,220,0.4)', marginBottom: '14px',
+  },
+  badges: { display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' },
+  badge: {
+    padding: '8px 20px', borderRadius: '20px', border: '1px solid',
+    fontSize: '13px', fontWeight: 600, letterSpacing: '0.3px',
+  },
+  descCard: {
+    background: 'linear-gradient(145deg, rgba(4,16,44,0.65), rgba(2,10,28,0.75))',
+    border: '1px solid rgba(72,202,228,0.07)', borderRadius: '18px',
+    padding: '28px 34px', marginBottom: '32px', textAlign: 'left',
+  },
+  descBody: {
+    fontSize: '16px', color: 'rgba(210,235,255,0.82)', lineHeight: 1.85,
+  },
+  parallelsBlock: { marginBottom: '44px', textAlign: 'left' },
+  parallelsBody: {
+    fontSize: '14px', color: 'rgba(180,220,255,0.6)', lineHeight: 1.85, fontStyle: 'italic',
+  },
+  interactBlock: { textAlign: 'left' },
+  interactGrid: {
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px',
+  },
+  interactCard: { borderRadius: '16px', border: '1px solid', padding: '20px 22px' },
+  interactGroup: {
+    fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase',
+    marginBottom: '8px',
+  },
+  interactText: {
+    fontSize: '13px', color: 'rgba(200,230,255,0.65)', lineHeight: 1.72,
+  },
+};
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 

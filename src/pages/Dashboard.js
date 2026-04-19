@@ -30,7 +30,28 @@ const GROUP_META = {
   },
 };
 
+// ── Mission Recommendation Scoring ───────────────────────────────────────────
+const GROUP_AFFINITY = {
+  Hunters:   ['cleanup', 'collection', 'remove', 'beach', 'drive', 'coastal'],
+  Wanderers: ['guide', 'education', 'learn', 'visitors', 'community', 'outreach', 'day'],
+  Guardians: ['restoration', 'protect', 'conservation', 'kelp', 'survey', 'monitor', 'workshop'],
+  Builders:  ['workshop', 'training', 'research', 'data', 'build', 'design', 'lab'],
+};
 
+function scoreMission(mission, { group, strengths, description, animal }) {
+  const haystack = `${mission.title} ${mission.description}`.toLowerCase();
+  let score = 0;
+  const strengthWords = (strengths || []).flatMap(s => s.toLowerCase().split(/\s+/));
+  strengthWords.forEach(w => { if (w.length > 3 && haystack.includes(w)) score += 15; });
+  score = Math.min(score, 45);
+  (GROUP_AFFINITY[group] || []).forEach(w => { if (haystack.includes(w)) score += 10; });
+  score = Math.min(score, 80);
+  const animalWord = (animal || '').toLowerCase().split(' ')[0];
+  if (animalWord && animalWord.length > 2 && haystack.includes(animalWord)) score += 20;
+  const descWords = (description || '').toLowerCase().split(/\W+/).filter(w => w.length > 5);
+  [...new Set(descWords)].slice(0, 15).forEach(w => { if (haystack.includes(w)) score += 3; });
+  return Math.min(score, 100);
+}
 
 // ─── Ocean Animation Panel ────────────────────────────────────────────────────
 
@@ -1368,6 +1389,17 @@ export default function Dashboard() {
   const myMeta = GROUP_META[myGroup] || GROUP_META.Guardians;
   const board = leaderboard || [];
   const evList = events || [];
+
+  // Read personality from localStorage for scoring
+  const _saved = (() => { try { return JSON.parse(localStorage.getItem('hymlSignup') || '{}'); } catch { return {}; } })();
+  const _strengths = Array.isArray(_saved.strengths) ? _saved.strengths : [];
+  const _description = _saved.description || '';
+  const _animal = _saved.animal || '';
+
+  const scoredEvList = evList
+    .map(ev => ({ ...ev, matchScore: scoreMission(ev, { group: myGroup, strengths: _strengths, description: _description, animal: _animal }) }))
+    .sort((a, b) => b.matchScore - a.matchScore);
+
   const maxPts = Math.max(
     1,
     ...board.map((g) => g.total_points || g.points || 0),
@@ -1500,8 +1532,9 @@ export default function Dashboard() {
         {/* MISSIONS TAB */}
         {activeTab === "missions" && (
           <div style={styles.content}>
+            <p style={styles.recSubtitle}>Sorted by match with your {_animal || myGroup} personality</p>
             <div style={styles.eventsList}>
-              {evList.map((ev, i) => {
+              {scoredEvList.map((ev, i) => {
                 const missionId = ev.id || i;
                 const isExpanded = expandedMissionId === missionId;
                 const details = getMissionDetails(ev);
@@ -1538,6 +1571,11 @@ export default function Dashboard() {
                           </span>
                           <span style={styles.eventDays}>D-{daysLeft}</span>
                         </div>
+                        {ev.matchScore > 0 && (
+                          <div style={{ ...styles.matchBadge, background: myMeta.bg, color: myMeta.color, borderColor: myMeta.border }}>
+                            {ev.matchScore}% match
+                          </div>
+                        )}
                         <div style={styles.eventPts}>+{ev.points} pts</div>
                       </div>
                     </div>
@@ -1978,6 +2016,20 @@ const styles = {
     fontSize: "13px",
     fontWeight: 700,
     color: "#10b981",
+  },
+  matchBadge: {
+    fontSize: "11px",
+    fontWeight: 800,
+    padding: "2px 9px",
+    borderRadius: "8px",
+    border: "1px solid",
+    marginTop: "4px",
+    display: "inline-block",
+  },
+  recSubtitle: {
+    fontSize: "13px",
+    color: "rgba(144,200,230,0.45)",
+    margin: "0 0 14px",
   },
   eventDetails: {
     width: "100%",

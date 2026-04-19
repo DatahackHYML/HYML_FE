@@ -31,3 +31,9 @@ export async function attendEvent(code) {
   if (!res.ok) throw new Error(`Attend API error: ${res.status}`);
   return res.json();
 }
+
+export async function getUserMissions(userId) {
+  const res = await fetch(`${BASE_URL}/user/missions${userId ? `?user_id=${encodeURIComponent(userId)}` : ''}`);
+  if (!res.ok) throw new Error(`User missions API error: ${res.status}`);
+  return res.json();
+}

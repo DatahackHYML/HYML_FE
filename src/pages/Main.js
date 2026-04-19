@@ -78,7 +78,6 @@ export default function Main() {
           HYML
         </span>
         <div style={styles.navLinks}>
-          <span style={styles.navLink}>Sign In</span>
           <span style={styles.navLink} onClick={scrollToContact}>
             Contact
           </span>

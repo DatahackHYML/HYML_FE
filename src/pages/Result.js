@@ -553,7 +553,7 @@ export default function Result() {
 
       // 3. Save their animal result to the backend profiles table
       const userId = authData.user.id;
-      await saveResult(userId, code, animal, group);
+      await saveResult(trimmedName, userId, code, animal, group);
 
       // 4. Cache locally so animalEmoji survives page navigation
       const animalDetail = ANIMAL_DATA[animal] || {};

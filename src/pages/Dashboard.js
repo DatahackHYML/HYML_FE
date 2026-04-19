@@ -98,27 +98,17 @@ const OCEAN_INDICATORS = [
   },
 ];
 
-// Derived indicator values from total points (simulated)
-function getIndicatorValues(totalPoints) {
-  const level = Math.floor(totalPoints / 1000); // 0-based improvement level
-  return {
-    ph: 6.5 + Math.min(level * 0.26, 1.8), // 6.5 → 8.3
-    salinity: 30 + Math.min(level * 1.4, 7), // 30 → 37
-    temperature: 30 - Math.min(level * 1.5, 10), // 30 → 20
-    dissolved_o2: 1 + Math.min(level * 1.83, 11), // 1 → 12
-    turbidity: 28 - Math.min(level * 4.6, 25), // 28 → 3
-  };
-}
+// ─── Ocean Animation Panel ────────────────────────────────────────────────────
 
-function indicatorColor(value, ind) {
-  const [lo, hi] = ind.good;
-  if (value >= lo && value <= hi) return "#10b981"; // green
-  const dist = value < lo ? lo - value : value - hi;
-  const range = ind.max - ind.min;
-  const badness = dist / range;
-  if (badness < 0.15) return "#f59e0b"; // yellow
-  return "#ef4444"; // red
-}
+const OCEAN_INDICATORS = [
+  { key: 'Temperature (°C)',      label: 'Temperature',      unit: '°C'  },
+  { key: 'Salinity (PSU)',        label: 'Salinity',         unit: ' PSU'},
+  { key: 'Dissolved Oxygen (µM)', label: 'Dissolved O₂',     unit: ' µM' },
+  { key: 'Fluorescence (V)',      label: 'Fluorescence',     unit: ' V'  },
+  { key: 'Beam Attenuation',      label: 'Beam Attenuation', unit: ''    },
+];
+
+
 
 // ─── SVG Ocean Scene Components ──────────────────────────────────────────────
 
@@ -753,8 +743,14 @@ function OceanPanel({ board, myGroup }) {
   const entry = board.find((e) => e.group === selectedGroup) || board[0];
   const groupPoints = entry?.total_points || 0;
   const level = Math.floor(groupPoints / 1000);
-  const indicatorVals = getIndicatorValues(groupPoints);
-
+  const [oceanData, setOceanData] = useState(null);
+  useEffect(() => {
+      const year = Math.max(2003, Math.min(2021, 2021 - Math.floor(groupPoints / 100)));
+      fetch(`https://hymlbe-production.up.railway.app/api/ocean-health?year=${year}`)
+          .then(r => r.json())
+          .then(setOceanData)
+          .catch(console.error);
+}, [groupPoints]);
   // Creatures unlocked per level (see getCreatures)
   const creatures = getCreatures(level);
   // Trash: 6 at level 0, remove one per level → 0 at level 6
@@ -1154,50 +1150,31 @@ function OceanPanel({ board, myGroup }) {
       {/* ── Right: Indicators (~10%) ───────────────────── */}
       <div style={oceanStyles.indicatorCol}>
         <p style={oceanStyles.indTitle}>Ocean Metrics</p>
-        {OCEAN_INDICATORS.map((ind) => {
-          const val = indicatorVals[ind.key];
-          const color = indicatorColor(val, ind);
-          const pct = ((val - ind.min) / (ind.max - ind.min)) * 100;
-          return (
-            <div key={ind.key} style={oceanStyles.indCard}>
-              <div style={oceanStyles.indHeader}>
-                <span style={oceanStyles.indLabel}>{ind.label}</span>
-                <span style={{ ...oceanStyles.indValue, color }}>
-                  {val.toFixed(1)}
-                  {ind.unit}
-                </span>
-              </div>
-              <div style={oceanStyles.indTrack}>
-                {/* good zone highlight */}
-                <div
-                  style={{
-                    ...oceanStyles.indGoodZone,
-                    left: `${((ind.good[0] - ind.min) / (ind.max - ind.min)) * 100}%`,
-                    width: `${((ind.good[1] - ind.good[0]) / (ind.max - ind.min)) * 100}%`,
-                  }}
-                />
-                <div
-                  style={{
-                    ...oceanStyles.indFill,
-                    width: `${pct}%`,
-                    background: color,
-                  }}
-                />
-              </div>
-              <div style={{ ...oceanStyles.indDot, background: color }}>
-                {color === "#10b981"
-                  ? "● Good"
-                  : color === "#f59e0b"
-                    ? "● Fair"
-                    : "● Poor"}
-              </div>
-            </div>
-          );
-        })}
+       {OCEAN_INDICATORS.map(ind => {
+  const metric = oceanData?.metrics?.[ind.key];
+  const val    = metric?.raw_value;
+  const color  = metric?.color  ?? '#888';
+  const label  = metric?.label  ?? '—';
+  const arrow  = metric?.arrow  ?? '';
+  const pct    = metric?.pct_change ?? 0;
+
+  return (
+    <div key={ind.key} style={oceanStyles.indCard}>
+      <div style={oceanStyles.indHeader}>
+        <span style={oceanStyles.indLabel}>{ind.label}</span>
+        <span style={{ ...oceanStyles.indValue, color }}>
+          {val != null ? val.toFixed(2) : '—'}{ind.unit}
+        </span>
+      </div>
+      <div style={{ fontSize: '10px', fontWeight: 700, color, background: color + '22', borderRadius: '6px', padding: '2px 6px', display: 'flex', justifyContent: 'space-between' }}>
+        <span>● {label}</span>
+        <span style={{ color: metric?.arrow_color, opacity: 0.85 }}>
+          {arrow} {pct !== 0 ? `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%` : 'baseline'}
+        </span>
       </div>
     </div>
   );
-}
+})}
 
 // ─────────────────────────────────────────────────────────────────────────────
 

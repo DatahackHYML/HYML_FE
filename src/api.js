@@ -32,14 +32,20 @@ export async function saveResult(userId, code, animal, group) {
   return res.json();
 }
 
-export async function attendEvent(code) {
+export async function attendEvent(userId, code) {
   const res = await fetch(`${BASE_URL}/events/attend`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({ user_id: userId, attend_code: code }),
   });
-  if (!res.ok) throw new Error(`Attend API error: ${res.status}`);
-  return res.json();
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new Error(data?.error || `Attend API error: ${res.status}`);
+  }
+  if (data?.success === false) {
+    throw new Error(data?.message || 'Attendance confirmation failed.');
+  }
+  return data;
 }
 
 export async function getUserMissions(userId) {

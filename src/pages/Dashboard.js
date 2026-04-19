@@ -1352,15 +1352,31 @@ export default function Dashboard() {
     setAttendLoading(true);
     setAttendResult(null);
     try {
-      const res = await attendEvent(attendCode.trim());
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user?.id) {
+        throw new Error("Please log in to confirm attendance.");
+      }
+
+      const res = await attendEvent(user.id, attendCode.trim());
+      const earnedPoints = res?.points_earned ?? 0;
+      const successMessage =
+        res?.message ||
+        (earnedPoints > 0
+          ? `Attendance confirmed! +${earnedPoints} echo points earned.`
+          : "Attendance already confirmed.");
+
       setAttendResult({
         ok: true,
-        message: res?.message || "Attendance confirmed! Echo points added.",
+        message: successMessage,
       });
-    } catch {
+    } catch (err) {
       setAttendResult({
         ok: false,
-        message: "Code not found. Check the event code and try again.",
+        message:
+          err?.message || "Code not found. Check the event code and try again.",
       });
     } finally {
       setAttendLoading(false);

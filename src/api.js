@@ -1,9 +1,10 @@
-const BASE_URL = process.env.REACT_APP_API_URL || 'https://hymlbe-production.up.railway.app'
+const BASE_URL =
+  process.env.REACT_APP_API_URL || "https://hymlbe-production.up.railway.app";
 
 export async function scoreQuiz(answers) {
   const res = await fetch(`${BASE_URL}/quiz/score`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ answers }),
   });
   if (!res.ok) throw new Error(`Score API error: ${res.status}`);
@@ -22,11 +23,17 @@ export async function getEvents() {
   return res.json();
 }
 
-export async function saveResult(userId, code, animal, group) {
+export async function saveResult(trimmedName, userId, code, animal, group) {
   const res = await fetch(`${BASE_URL}/profiles`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, code, animal, group }),
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: trimmedName,
+      userId,
+      code,
+      animal,
+      group,
+    }),
   });
   if (!res.ok) throw new Error(`Save result error: ${res.status}`);
   return res.json();
@@ -34,8 +41,8 @@ export async function saveResult(userId, code, animal, group) {
 
 export async function attendEvent(userId, code) {
   const res = await fetch(`${BASE_URL}/events/attend`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId, attend_code: code }),
   });
   const data = await res.json().catch(() => null);
@@ -43,13 +50,15 @@ export async function attendEvent(userId, code) {
     throw new Error(data?.error || `Attend API error: ${res.status}`);
   }
   if (data?.success === false) {
-    throw new Error(data?.message || 'Attendance confirmation failed.');
+    throw new Error(data?.message || "Attendance confirmation failed.");
   }
   return data;
 }
 
 export async function getUserMissions(userId) {
-  const res = await fetch(`${BASE_URL}/user/missions${userId ? `?user_id=${encodeURIComponent(userId)}` : ''}`);
+  const res = await fetch(
+    `${BASE_URL}/user/missions${userId ? `?user_id=${encodeURIComponent(userId)}` : ""}`,
+  );
   if (!res.ok) throw new Error(`User missions API error: ${res.status}`);
   return res.json();
 }

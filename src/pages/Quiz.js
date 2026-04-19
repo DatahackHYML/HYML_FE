@@ -191,7 +191,8 @@ export default function Quiz() {
 }
 
 function localScore(answers) {
-  const dim = (start) => {
+  // Each dimension: count A answers in the 4-question block
+const dim = (start) => {
     const slice = answers.slice(start, start + 4);
     const aCount = slice.filter(x => x === 'A').length;
     
@@ -202,6 +203,7 @@ function localScore(answers) {
     
     return aCount > 2 ? 'A' : 'B';
   };
+
   // 1. Calculate the raw letters
   const d1 = dim(0) === 'A' ? 'D' : 'R';  // Deep vs Reef
   const d2 = dim(4) === 'A' ? 'C' : 'T';  // Current vs Tide
@@ -220,13 +222,13 @@ function localScore(answers) {
     'DCNS': { animal: 'Moray Eel',         group: 'Hunters',   emoji: '🐍' },
     'DCNF': { animal: 'Mantis Shrimp',     group: 'Hunters',   emoji: '🦐' },
     'DRPS': { animal: 'Sea Turtle',        group: 'Wanderers', emoji: '🐢' },
-    'DRPF': { animal: 'Manta Ray',         group: 'Wanderers', emoji: '🐟' },
+    'DRPF': { animal: 'Manta Ray',         group: 'Wanderers', emoji: '🐡' },
     'DRNS': { animal: 'Flying Fish',       group: 'Wanderers', emoji: '🐟' },
     'DRNF': { animal: 'Jellyfish',         group: 'Wanderers', emoji: '🪼' },
     'RCPS': { animal: 'Humpback Whale',    group: 'Guardians', emoji: '🐳' },
     'RCPF': { animal: 'Dolphin',           group: 'Guardians', emoji: '🐬' },
     'RCNS': { animal: 'Octopus',           group: 'Guardians', emoji: '🐙' },
-    'RCNF': { animal: 'Seahorse',          group: 'Guardians', emoji: '🐉' },
+    'RCNF': { animal: 'Seahorse',          group: 'Guardians', emoji: '🐠' },
     'RRPS': { animal: 'Clownfish',         group: 'Builders',  emoji: '🐠' },
     'RRPF': { animal: 'Sea Otter',         group: 'Builders',  emoji: '🦦' },
     'RRNS': { animal: 'Hermit Crab',       group: 'Builders',  emoji: '🦀' },
@@ -234,6 +236,9 @@ function localScore(answers) {
   };
 
   const match = codeMap[lookupKey] || { animal: 'Starfish', group: 'Guardians', emoji: '⭐' };
+
+  console.log('[localScore] answers:', answers);
+  console.log(`[localScore] D1=${d1} D2=${d2} D3=${d3} D4=${d4} → code=${displayCode} → ${match.animal} (${match.group})`);
 
   return {
     animal: match.animal,

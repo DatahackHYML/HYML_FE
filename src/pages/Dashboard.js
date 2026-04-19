@@ -629,6 +629,35 @@ function OceanPanel({ board, myGroup }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+function IconMissions() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <circle cx="12" cy="12" r="6"/>
+      <circle cx="12" cy="12" r="2"/>
+    </svg>
+  );
+}
+
+function IconLeaderboard() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="12" width="6" height="10" rx="1"/>
+      <rect x="9" y="7" width="6" height="15" rx="1"/>
+      <rect x="16" y="3" width="6" height="19" rx="1"/>
+    </svg>
+  );
+}
+
+function IconAttend() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
+      <circle cx="12" cy="10" r="3"/>
+    </svg>
+  );
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -702,7 +731,11 @@ export default function Dashboard() {
       <div style={styles.sidebar}>
         <div style={styles.sidebarLogo} onClick={() => navigate('/')}>HYML</div>
         <div style={styles.sidebarGroup}>
-          <div style={{ ...styles.groupOrb, background: myMeta.bg, borderColor: myMeta.border }}>
+          <div
+            style={{ ...styles.groupOrb, background: myMeta.bg, borderColor: myMeta.border, cursor: 'pointer' }}
+            title="My Profile"
+            onClick={() => navigate('/mypage', { state: { group: myGroup } })}
+          >
             <span style={{ fontSize: '28px' }}>{myMeta.emoji}</span>
           </div>
           <div>
@@ -712,9 +745,9 @@ export default function Dashboard() {
         </div>
         <nav style={styles.sidebarNav}>
           {[
-            { id: 'missions', icon: '🎯', label: 'Missions' },
-            { id: 'leaderboard', icon: '🏆', label: 'Leaderboard' },
-            { id: 'attend', icon: '📍', label: 'Attend Event' },
+            { id: 'missions',     icon: <IconMissions />,    label: 'Missions' },
+            { id: 'leaderboard',  icon: <IconLeaderboard />, label: 'Leaderboard' },
+            { id: 'attend',       icon: <IconAttend />,      label: 'Attend Event' },
           ].map(item => (
             <button
               key={item.id}
@@ -726,7 +759,7 @@ export default function Dashboard() {
               }}
               onClick={() => setActiveTab(item.id)}
             >
-              <span>{item.icon}</span>
+              {item.icon}
               <span>{item.label}</span>
             </button>
           ))}
@@ -750,7 +783,11 @@ export default function Dashboard() {
               {activeTab === 'attend' && 'Enter your event code to log attendance and earn points'}
             </p>
           </div>
-          <div style={{ ...styles.myGroupBadge, background: myMeta.bg, borderColor: myMeta.border, color: myMeta.color }}>
+          <div
+            style={{ ...styles.myGroupBadge, background: myMeta.bg, borderColor: myMeta.border, color: myMeta.color, cursor: 'pointer' }}
+            title="Go to My Profile"
+            onClick={() => navigate('/mypage', { state: { group: myGroup } })}
+          >
             {myMeta.emoji} {myGroup}
           </div>
         </div>

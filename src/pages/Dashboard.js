@@ -1350,12 +1350,14 @@ export default function Dashboard() {
         message: successMessage,
       });
 
+      // Invalidate MyPage mission cache so fresh data is fetched on next visit
+      try { localStorage.removeItem('hymlMissions'); } catch {}
+
       await loadData();
     } catch (err) {
       setAttendResult({
         ok: false,
-        message:
-          err?.message || "Code not found. Check the event code and try again.",
+        message: "Code invalid or already used. Please check and try again.",
       });
     } finally {
       setAttendLoading(false);
@@ -1526,7 +1528,7 @@ export default function Dashboard() {
                         <div style={styles.eventDot} />
                         <div>
                           <p style={styles.eventTitle}>{ev.title}</p>
-                          <p style={styles.eventOrg}>{ev.organizer}</p>
+                          <p style={styles.eventOrg}>{ev.location || ''}</p>
                         </div>
                       </div>
                       <div style={styles.eventRight}>
@@ -1731,7 +1733,7 @@ export default function Dashboard() {
                     color: attendResult.ok ? "#6ee7b7" : "#fca5a5",
                   }}
                 >
-                  {attendResult.ok ? "✓ " : "✗ "}
+                  {attendResult.ok ? "✓ " : ""}
                   {attendResult.message}
                 </div>
               )}
@@ -1745,7 +1747,7 @@ export default function Dashboard() {
                   <div>
                     <p style={styles.upcomingName}>{ev.title}</p>
                     <p style={styles.upcomingOrg}>
-                      {ev.organizer} · {ev.date}
+                      {ev.location}{ev.event_date ? ' · ' + new Date(ev.event_date).toLocaleDateString('en-US') : ''}
                     </p>
                   </div>
                   <span style={styles.upcomingPts}>+{ev.points} pts</span>

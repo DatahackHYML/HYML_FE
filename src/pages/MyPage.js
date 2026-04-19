@@ -72,10 +72,8 @@ export default function MyPage() {
 
   const meta = GROUP_META[group] || GROUP_META.Guardians;
 
-  // Load cached missions instantly, then fetch fresh
-  const _cachedMissions = (() => { try { return JSON.parse(localStorage.getItem('hymlMissions') || 'null'); } catch { return null; } })();
-  const [missions, setMissions] = useState(_cachedMissions);
-  const [loading,  setLoading]  = useState(!_cachedMissions);
+  const [missions, setMissions] = useState(null);
+  const [loading,  setLoading]  = useState(true);
 
   // Argo float data
   const argoRef = useRef(null);
@@ -91,11 +89,9 @@ export default function MyPage() {
         const uid = user?.id || location.state?.userId || null;
         const data = await getUserMissions(uid);
         const list = data?.data || data?.missions || (Array.isArray(data) ? data : null);
-        const verified = list?.filter(m => m.verified) || [];
-        setMissions(verified);
-        try { localStorage.setItem('hymlMissions', JSON.stringify(verified)); } catch {}
+        setMissions(list?.filter(m => m.attended) || []);
       } catch {
-        if (!_cachedMissions) setMissions([]);
+        setMissions([]);
       } finally {
         setLoading(false);
       }
@@ -280,12 +276,12 @@ export default function MyPage() {
                     </div>
                     <div style={styles.missionInfo}>
                       <p style={styles.missionTitle}>{m.title}</p>
-                      <p style={styles.missionOrg}>{m.organizer}</p>
+                      <p style={styles.missionOrg}>{m.location || m.description || ''}</p>
                       <div style={styles.missionMeta}>
                         <span style={{ ...styles.typePill, background: typeMeta.bg, color: typeMeta.color }}>
                           {m.type || 'Community'}
                         </span>
-                        <span style={styles.missionDate}>{m.date}</span>
+                        <span style={styles.missionDate}>{m.event_date ? new Date(m.event_date).toLocaleDateString('en-US') : ''}</span>
                       </div>
                     </div>
                     <div style={styles.missionRight}>

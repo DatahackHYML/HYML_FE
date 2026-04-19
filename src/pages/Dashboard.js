@@ -774,7 +774,7 @@ function OceanPanel({ board, myGroup }) {
   const [selectedGroup, setSelectedGroup] = useState(myGroup);
 
   const entry = board.find((e) => e.group === selectedGroup) || board[0];
-  const groupPoints = entry?.points || 0;
+  const groupPoints = entry?.total_points || 0;
   const level = Math.floor(groupPoints / 1000);
   const indicatorVals = getIndicatorValues(groupPoints);
 
@@ -832,7 +832,7 @@ function OceanPanel({ board, myGroup }) {
                   </span>
                 )}
                 <span style={{ fontSize: "11px", opacity: 0.7 }}>
-                  {(e.points || 0).toLocaleString()} pts
+                  {(e.total_points || 0).toLocaleString()} pts
                 </span>
               </button>
             );
@@ -1627,7 +1627,7 @@ export default function Dashboard() {
                 {board.map((entry, i) => {
                   const meta = GROUP_META[entry.group] || GROUP_META.Guardians;
                   const isMe = entry.group === myGroup;
-                  const pct = ((entry.points || 0) / maxPts) * 100;
+                  const pct = ((entry.total_points || 0) / maxPts) * 100;
                   return (
                     <div
                       key={entry.group}
@@ -1675,7 +1675,7 @@ export default function Dashboard() {
                             )}
                           </span>
                           <span style={styles.leaderPts}>
-                            {(entry.points || 0).toLocaleString()} pts
+                            {(entry.total_points || 0).toLocaleString()} pts
                           </span>
                         </div>
                         <div style={styles.barTrack}>
